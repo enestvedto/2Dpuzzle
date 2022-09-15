@@ -1,0 +1,84 @@
+<html>
+
+<head>
+    <title>CSC5210 The Pinnacle of Puzzles </title>
+</head>
+
+<body>
+
+    <canvas id="myCanvas" width="800" height="600"></canvas>
+    <script src="three.js"></script>
+
+    <img src="https://js.cx/clipart/ball.svg"
+        style="cursor: pointer; position: absolute; z-index: 1000; left: 367px; top: 106.5px;" width="40" height="40"
+        id="ball">
+
+    <script>
+        var scene = new THREE.Scene();
+
+        var camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, .1, 3000);
+        camera.position.z = 100;  // Try moving this around!
+        camera.lookAt(new THREE.Vector3(0.0, 0.0, 0.0));
+        scene.add(camera);
+
+        var renderer = new THREE.WebGLRenderer({ canvas: myCanvas, antialias: true, alpha: true });
+        renderer.setClearColor(0xffffff);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+
+
+        // The "Frame-per-second" loop
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+
+        // Initiate the graphical loop
+        animate();
+    </script>
+
+    <script>
+        ball.onmousedown = function (event) {
+
+            var shiftX = event.clientX - ball.getBoundingClientRect().left;
+            var shiftY = event.clientY - ball.getBoundingClientRect().top;
+
+            ball.style.position = 'absolute';
+            ball.style.zIndex = 1000;
+
+            moveAt(event.pageX, event.pageY);
+
+            // moves the ball at (pageX, pageY) coordinates
+            // taking initial shifts into account
+            function moveAt(pageX, pageY) {
+                ball.style.left = pageX - shiftX + 'px';
+                ball.style.top = pageY - shiftY + 'px';
+            }
+
+            function onMouseMove(event) {
+                moveAt(event.pageX, event.pageY);
+            }
+
+            // move the ball on mousemove
+            document.addEventListener('mousemove', onMouseMove);
+
+            // drop the ball, remove unneeded handlers
+            ball.onmouseup = function () {
+                document.removeEventListener('mousemove', onMouseMove);
+                ball.onmouseup = null;
+            };
+
+        };
+
+        ball.ondragstart = function () {
+            return false;
+        };
+    </script>
+</body>
+
+</html>

@@ -8,12 +8,10 @@
 
     <canvas id="myCanvas" width="800" height="600"></canvas>
     <script src="three.js"></script>
-
-    <img src="https://js.cx/clipart/ball.svg"
-        style="cursor: pointer; position: absolute; z-index: 1000; left: 367px; top: 106.5px;" width="40" height="40"
-        id="ball">
+    <script src="DragControls.js"></script>
 
     <script>
+        // Create the object to represent a triangle
         var scene = new THREE.Scene();
 
         var camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, .1, 3000);
@@ -26,7 +24,22 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
 
+        const material = new THREE.LineBasicMaterial({ color: 0x000000 });
 
+        const points = [];
+        points.push(new THREE.Vector3(-12.5, -12.5, 0));
+        points.push(new THREE.Vector3(12.5, -12.5, 0));
+        points.push(new THREE.Vector3(12.5, 12.5, 0));
+        points.push(new THREE.Vector3(-12.5, 12.5, 0));
+        points.push(new THREE.Vector3(-12.5, -12.5, 0));
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(geometry, material);
+        scene.add(line);
+
+        function getRndInteger(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
 
         // The "Frame-per-second" loop
         function animate() {
@@ -40,44 +53,47 @@
 
         // Initiate the graphical loop
         animate();
-    </script>
 
-    <script>
-        ball.onmousedown = function (event) {
+        var triangles = [];
 
-            var shiftX = event.clientX - ball.getBoundingClientRect().left;
-            var shiftY = event.clientY - ball.getBoundingClientRect().top;
+        for (var i = 0; i < 5; i++) {
+            const baseTriangle = new THREE.BufferGeometry();
 
-            ball.style.position = 'absolute';
-            ball.style.zIndex = 1000;
+            var x1 = getRndInteger(-20, 0) * 0.5;
+            var y1 = getRndInteger(-20, 0) * 0.5;
+            var x2 = getRndInteger(0, 20) * 0.5;
+            var y2 = getRndInteger(-20, 0) * 0.5;
+            var x3 = getRndInteger(x1, y1) * 0.5;
+            var y3 = getRndInteger(y2, 20) * 0.5;
+            var z = 0;
 
-            moveAt(event.pageX, event.pageY);
+            var vertices = new Float32Array([
+                x1, y1, z,
+                x2, y2, z,
+                x3, y3, z,
+            ]);
 
-            // moves the ball at (pageX, pageY) coordinates
-            // taking initial shifts into account
-            function moveAt(pageX, pageY) {
-                ball.style.left = pageX - shiftX + 'px';
-                ball.style.top = pageY - shiftY + 'px';
-            }
+            baseTriangle.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            var _material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            var mesh = new THREE.Mesh(baseTriangle, _material);
+            //12.5 x
+            //12.5 y
+            //mesh.translateX(Math.random() * 20 - 10);
+            //mesh.translateY(Math.random() * 20 - 10);
+            scene.add(mesh);
 
-            function onMouseMove(event) {
-                moveAt(event.pageX, event.pageY);
-            }
+            triangles.push(mesh);
+        }
 
-            // move the ball on mousemove
-            document.addEventListener('mousemove', onMouseMove);
+        var controls = new THREE.DragControls(triangles, camera, renderer.domElement);
+        var color;
+        controls.addEventListener('dragstart', function (event) {
+            event.object.material.opacity = 0.5
+        })
+        controls.addEventListener('dragend', function (event) {
+            event.object.material.opacity = 1
+        })
 
-            // drop the ball, remove unneeded handlers
-            ball.onmouseup = function () {
-                document.removeEventListener('mousemove', onMouseMove);
-                ball.onmouseup = null;
-            };
-
-        };
-
-        ball.ondragstart = function () {
-            return false;
-        };
     </script>
 </body>
 

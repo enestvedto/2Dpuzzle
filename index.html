@@ -55,16 +55,16 @@
         animate();
 
         var triangles = [];
-
-        for (var i = 0; i < 5; i++) {
+        var i = 0;
+        while (i < 50) {
             const baseTriangle = new THREE.BufferGeometry();
 
-            var x1 = getRndInteger(-20, 0) * 0.5;
-            var y1 = getRndInteger(-20, 0) * 0.5;
-            var x2 = getRndInteger(0, 20) * 0.5;
-            var y2 = getRndInteger(-20, 0) * 0.5;
-            var x3 = getRndInteger(x1, y1) * 0.5;
-            var y3 = getRndInteger(y2, 20) * 0.5;
+            var x1 = getRndInteger(-30, 30);
+            var y1 = getRndInteger(-30, 25);
+            var x2 = x1 + 3;//getRndInteger(x1 + 1, 30);
+            var y2 = y1;//getRndInteger(-20, 0);
+            var x3 = (x2 + x1) / 2;//getRndInteger(x1, y1) * 0.5;
+            var y3 = y1 + 5;//getRndInteger(y2, 20) * 0.5;
             var z = 0;
 
             var vertices = new Float32Array([
@@ -76,17 +76,24 @@
             baseTriangle.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
             var _material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
             var mesh = new THREE.Mesh(baseTriangle, _material);
-            //12.5 x
-            //12.5 y
-            //mesh.translateX(Math.random() * 20 - 10);
-            //mesh.translateY(Math.random() * 20 - 10);
-            scene.add(mesh);
 
-            var helper = new THREE.BoxHelper(mesh, 0xff0000);
-            helper.update();
-            scene.add(helper);
-
-            triangles.push(mesh);
+            //check for intersections
+            var draw = true;
+            for (let j = 0; j < triangles.length; j++) {
+                var checkBox = triangles[j];
+                firstBB = new THREE.Box3().setFromObject(mesh);
+                secondBB = new THREE.Box3().setFromObject(checkBox);
+                var collision = firstBB.intersectsBox(secondBB);
+                if (collision) {
+                    draw = false;
+                }
+            }
+            // dont add the triangle if it hits any others
+            if (draw) {
+                scene.add(mesh);
+                triangles.push(mesh);
+                i++;
+            }
         }
 
         var controls = new THREE.DragControls(triangles, camera, renderer.domElement);

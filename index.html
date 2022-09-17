@@ -82,6 +82,10 @@
             //mesh.translateY(Math.random() * 20 - 10);
             scene.add(mesh);
 
+            var helper = new THREE.BoxHelper(mesh, 0xff0000);
+            helper.update();
+            scene.add(helper);
+
             triangles.push(mesh);
         }
 

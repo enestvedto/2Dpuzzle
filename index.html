@@ -24,8 +24,15 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
 
+        //drawing the board itself which will stay white and be a way to use Box3
+        const boardgeometry = new THREE.BoxGeometry(25, 25, 0);
+        const boardmaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 });
+        const board = new THREE.Mesh(boardgeometry, boardmaterial);
+        scene.add(board);
+
         const material = new THREE.LineBasicMaterial({ color: 0x000000 });
 
+        //drawing vectors for the outline of the board
         const points = [];
         points.push(new THREE.Vector3(-12.5, -12.5, 0));
         points.push(new THREE.Vector3(12.5, -12.5, 0));
@@ -36,6 +43,7 @@
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
         const line = new THREE.Line(geometry, material);
         scene.add(line);
+
 
         function getRndInteger(min, max) {
             return Math.floor(Math.random() * (max - min)) + min;
@@ -54,13 +62,43 @@
         // Initiate the graphical loop
         animate();
 
+        //var pointlist = [];
+        //var 
+        var tl = new Float32Array([5, 5, 0]);
+
+
+        var centerx = getRndInteger(-2.5, 2.5);
+        var centery = getRndInteger(-2.5, 2.5);
+        var lefty = getRndInteger(-12.5, 12.5);
+        var topx = getRndInteger(-12.5, 12.5);
+        var righty = getRndInteger(-12.5, 12.5);
+        var bottomx = getRndInteger(-12.5, 12.5);
+
+
+
+        const dotGeometry = new THREE.BufferGeometry();
+        dotGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+            -12.5, 12.5, 0,
+            topx, 12.5, 0,
+            12.5, 12.5, 0,
+            12.5, righty, 0,
+            -12.5, -12.5, 0,
+            bottomx, -12.5, 0,
+            12.5, -12.5, 0,
+            -12.5, lefty, 0,
+            centerx, centery, 0]), 3));
+        const dotMaterial = new THREE.PointsMaterial({ size: 1, color: 0xff0000 });
+        const dot = new THREE.Points(dotGeometry, dotMaterial);
+        scene.add(dot);
+
+        /*
         var triangles = [];
         var i = 0;
-        while (i < 50) {
+        while (i < 5) {
             const baseTriangle = new THREE.BufferGeometry();
 
-            var x1 = getRndInteger(-30, 30);
-            var y1 = getRndInteger(-30, 25);
+            var x1 = getRndInteger(-25, 22);
+            var y1 = getRndInteger(-25, 20);
             var x2 = x1 + 3;//getRndInteger(x1 + 1, 30);
             var y2 = y1;//getRndInteger(-20, 0);
             var x3 = (x2 + x1) / 2;//getRndInteger(x1, y1) * 0.5;
@@ -83,8 +121,10 @@
                 var checkBox = triangles[j];
                 firstBB = new THREE.Box3().setFromObject(mesh);
                 secondBB = new THREE.Box3().setFromObject(checkBox);
-                var collision = firstBB.intersectsBox(secondBB);
-                if (collision) {
+                boardBB = new THREE.Box3().setFromObject(board);
+                var collision1 = firstBB.intersectsBox(secondBB);
+                var collision2 = firstBB.intersectsBox(boardBB);
+                if (collision1 || collision2) {
                     draw = false;
                 }
             }
@@ -92,6 +132,9 @@
             if (draw) {
                 scene.add(mesh);
                 triangles.push(mesh);
+                var helper = new THREE.BoxHelper(mesh, 0xff0000);
+                helper.update();
+                scene.add(helper);
                 i++;
             }
         }
@@ -104,6 +147,7 @@
         controls.addEventListener('dragend', function (event) {
             event.object.material.opacity = 1
         })
+        */
 
     </script>
 </body>

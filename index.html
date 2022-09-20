@@ -5,6 +5,7 @@
 </head>
 
 <body>
+    <button onclick="load()">Click me to test your prize for finishing the puzzle!</button>
 
     <canvas id="myCanvas" width="800" height="600"></canvas>
     <script src="three.js"></script>
@@ -61,12 +62,6 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
 
-        //drawing the board itself which will stay white and be a way to use Box3
-        //const boardgeometry = new THREE.BoxGeometry(25, 25, 0);
-        //const boardmaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 });
-        //const board = new THREE.Mesh(boardgeometry, boardmaterial);
-        //scene.add(board);
-
         const material = new THREE.LineBasicMaterial({ color: 0x000000 });
 
         //drawing vectors for the outline of the board
@@ -96,29 +91,8 @@
 
         var centerx = getRndInteger(-5, 5);
         var centery = getRndInteger(-5, 5);
-        var lefty = getRndInteger(-10, 10);
-        var topx = getRndInteger(-10, 10);
-        var righty = getRndInteger(-10, 10);
-        var bottomx = getRndInteger(-10, 10);
 
         var triangles = [];
-
-        /*
-        const dotGeometry = new THREE.BufferGeometry();
-        dotGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
-            -12.5, 12.5, 0,
-            topx, 12.5, 0,
-            12.5, 12.5, 0,
-            12.5, righty, 0,
-            -12.5, -12.5, 0,
-            bottomx, -12.5, 0,
-            12.5, -12.5, 0,
-            -12.5, lefty, 0,
-            centerx, centery, 0]), 3));
-        const dotMaterial = new THREE.PointsMaterial({ size: 1, color: 0x000000 });
-        const dot = new THREE.Points(dotGeometry, dotMaterial);
-        scene.add(dot);
-        */
 
         //this method initializes the board. you CAN NOT have less than 6 pieces per directions
         function buildBoard(numberOfPieces) {
@@ -252,29 +226,14 @@
 
         }
 
+        buildBoard(6);
+
+        function load() {
+            window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
+        }
 
 
-        buildBoard(13);
-        /*
-                t1 = new Triangle([-12.5, 12.5, 0], [centerx, centery, 0], [topx, 12.5, 0]);
-                t1.render();
-                triangles.push(t1.mesh);
-                t2 = new Triangle([topx, 12.5, 0], [centerx, centery, 0], [12.5, 12.5, 0],);
-                t2.render();
-                triangles.push(t2.mesh);
-                t3 = new Triangle([12.5, 12.5, 0], [centerx, centery, 0], [12.5, -12.5, 0],);
-                t3.render();
-                triangles.push(t3.mesh);
-                t4 = new Triangle([12.5, -12.5, 0], [centerx, centery, 0], [bottomx, -12.5, 0],);
-                t4.render();
-                triangles.push(t4.mesh);
-                t5 = new Triangle([bottomx, -12.5, 0], [centerx, centery, 0], [-12.5, -12.5, 0],);
-                t5.render();
-                triangles.push(t5.mesh);
-                t6 = new Triangle([-12.5, -12.5, 0], [centerx, centery, 0], [-12.5, 12.5, 0],);
-                t6.render();
-                triangles.push(t6.mesh);
-        */
+
         /*
                 for (let i = 0; i < triangles.length - 1; i++) {
                     _out = triangles[i];
@@ -291,7 +250,7 @@
 
         var controls = new THREE.DragControls(triangles, camera, renderer.domElement);
         controls.addEventListener('dragstart', function (event) {
-            event.object.material.opacity = 0.7
+            event.object.material.opacity = 0.8
         })
         controls.addEventListener('dragend', function (event) {
             event.object.material.opacity = 1

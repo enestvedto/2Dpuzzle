@@ -128,13 +128,14 @@
                 return;
             }
 
+            // calculate how to divide the number of vertices generated based on the number of triangles desired
             perSide = Math.trunc(numberOfPieces / 4);
             LrTb = numberOfPieces % 4;
+
             sides = [perSide, perSide, perSide, perSide];
             for (i = 0; i < LrTb; i++) {
                 sides[i % 4] = sides[i % 4] + 1;
             }
-
             _left = sides[0];
             leftPoints = [];
             _right = sides[1];
@@ -144,60 +145,153 @@
             _bottom = sides[3];
             bottomPoints = [];
 
-            for (var i = 0; i < _left; i++) {
-                leftPoints[i] = getRndInteger(-10, 10);
+            // randomly generate the desired number of vertices on each border side
+            for (var i = 0; i < _left - 1; i++) {
+                leftPoints.push(getRndInteger(-10, 10));
             }
-            for (var i = 0; i < _right; i++) {
-                rightPoints[i] = getRndInteger(-10, 10);
+            for (var i = 0; i < _right - 1; i++) {
+                rightPoints.push(getRndInteger(-10, 10));
             }
-            for (var i = 0; i < _top; i++) {
-                topPoints[i] = getRndInteger(-10, 10);
+            for (var i = 0; i < _top - 1; i++) {
+                topPoints.push(getRndInteger(-10, 10));
             }
-            for (var i = 0; i < _bottom; i++) {
-                bottomPoints[i] = getRndInteger(-10, 10);
+            for (var i = 0; i < _bottom - 1; i++) {
+                bottomPoints.push(getRndInteger(-10, 10));
             }
+            // working neg to pos
+            leftPoints.sort(function (a, b) { return a - b });
+            // working pos to neg
+            rightPoints.sort(function (a, b) { return a - b });
+            rightPoints.reverse();
+            // working neg to pos
+            topPoints.sort(function (a, b) { return a - b });
+            // working pos to neg
+            bottomPoints.sort(function (a, b) { return a - b });
+            bottomPoints.reverse();
 
             allPoints = [];
 
-        }
+            // put all the vertices in a list to easily reference. the 3rd vertex will always be the first vertex 
+            // of the next triangle, and the generated origin will always be the second for each triangle.
 
-        buildBoard(11);
-
-        t1 = new Triangle([-12.5, 12.5, 0], [centerx, centery, 0], [topx, 12.5, 0]);
-        t1.render();
-        triangles.push(t1.mesh);
-        t2 = new Triangle([topx, 12.5, 0], [centerx, centery, 0], [12.5, 12.5, 0],);
-        t2.render();
-        triangles.push(t2.mesh);
-        t3 = new Triangle([12.5, 12.5, 0], [centerx, centery, 0], [12.5, -12.5, 0],);
-        t3.render();
-        triangles.push(t3.mesh);
-        t4 = new Triangle([12.5, -12.5, 0], [centerx, centery, 0], [bottomx, -12.5, 0],);
-        t4.render();
-        triangles.push(t4.mesh);
-        t5 = new Triangle([bottomx, -12.5, 0], [centerx, centery, 0], [-12.5, -12.5, 0],);
-        t5.render();
-        triangles.push(t5.mesh);
-        t6 = new Triangle([-12.5, -12.5, 0], [centerx, centery, 0], [-12.5, 12.5, 0],);
-        t6.render();
-        triangles.push(t6.mesh);
-
-        for (let i = 0; i < triangles.length - 1; i++) {
-            _out = triangles[i];
-            for (let j = 1; j < triangles.length; j++) {
-                _in = triangles[j];
-                outBB = new THREE.Box3().setFromObject(_out);
-                inBB = new THREE.Box3().setFromObject(_in);
-                collision = outBB.intersectsBox(inBB);
-                //while (collision) {
-                // }
+            //start with the bottom left corner vertex
+            allPoints.push([-12.5, -12.5, 0]);
+            for (var i = 0; i < leftPoints.length + 1; i++) {
+                // push origin point
+                allPoints.push([centerx, centery, 0]);
+                //push the next random vertex on the board line
+                allPoints.push([-12.5, leftPoints[i], 0]);
+                // push the same point again as it will serve as the first vertex for the next triangle
+                allPoints.push([-12.5, leftPoints[i], 0]);
             }
+            //remove extra vertices and replace with corner vertex
+            allPoints.pop();
+            allPoints.pop();
+            //finish the left triangles with the top left vertex
+            allPoints.push([-12.5, 12.5, 0]);
+
+
+            //next do the top vertices starting with the top left vertex
+            allPoints.push([-12.5, 12.5, 0]);
+            for (var i = 0; i < topPoints.length + 1; i++) {
+                // push origin point
+                allPoints.push([centerx, centery, 0]);
+                //push the next random vertex on the board line
+                allPoints.push([topPoints[i], 12.5, 0]);
+                // push the same point again as it will serve as the first vertex for the next triangle
+                allPoints.push([topPoints[i], 12.5, 0]);
+            }
+            //remove extra vertex and replace with corner vertex
+            allPoints.pop();
+            allPoints.pop();
+            //finish the top triangles with the top right vertex
+            allPoints.push([12.5, 12.5, 0]);
+
+
+            // next do the right vertices starting with the top right vertex
+            allPoints.push([12.5, 12.5, 0]);
+            for (var i = 0; i < rightPoints.length + 1; i++) {
+                // push origin point
+                allPoints.push([centerx, centery, 0]);
+                //push the next random vertex on the board line
+                allPoints.push([12.5, rightPoints[i], 0]);
+                // push the same point again as it will serve as the first vertex for the next triangle
+                allPoints.push([12.5, rightPoints[i], 0]);
+            }
+            //remove extra vertex and replace with corner vertex
+            allPoints.pop();
+            allPoints.pop();
+            //finish the right triangles with the bottom right vertex
+            allPoints.push([12.5, -12.5, 0]);
+
+
+            // lastly do the bottom vertices starting with the bottom right vertex
+            allPoints.push([12.5, -12.5, 0]);
+            for (var i = 0; i < bottomPoints.length + 1; i++) {
+                // push origin point
+                allPoints.push([centerx, centery, 0]);
+                //push the next random vertex on the board line
+                allPoints.push([bottomPoints[i], -12.5, 0]);
+                // push the same point again as it will serve as the first vertex for the next triangle
+                allPoints.push([bottomPoints[i], -12.5, 0]);
+            }
+            //remove extra vertex and replace with corner vertex
+            allPoints.pop();
+            allPoints.pop();
+            // finish the bottom triangles with the bottom left vertex (initial starting vertex)
+            allPoints.push([-12.5, -12.5, 0]);
+
+
+            // turn the list of all the vertices into triangles!
+            for (var i = 0; i < allPoints.length; i += 3) {
+                tmpTriangle = new Triangle(allPoints[i], allPoints[i + 1], allPoints[i + 2]);
+                tmpTriangle.render();
+                triangles.push(tmpTriangle.mesh);
+            }
+
+
         }
 
+
+
+        buildBoard(13);
+        /*
+                t1 = new Triangle([-12.5, 12.5, 0], [centerx, centery, 0], [topx, 12.5, 0]);
+                t1.render();
+                triangles.push(t1.mesh);
+                t2 = new Triangle([topx, 12.5, 0], [centerx, centery, 0], [12.5, 12.5, 0],);
+                t2.render();
+                triangles.push(t2.mesh);
+                t3 = new Triangle([12.5, 12.5, 0], [centerx, centery, 0], [12.5, -12.5, 0],);
+                t3.render();
+                triangles.push(t3.mesh);
+                t4 = new Triangle([12.5, -12.5, 0], [centerx, centery, 0], [bottomx, -12.5, 0],);
+                t4.render();
+                triangles.push(t4.mesh);
+                t5 = new Triangle([bottomx, -12.5, 0], [centerx, centery, 0], [-12.5, -12.5, 0],);
+                t5.render();
+                triangles.push(t5.mesh);
+                t6 = new Triangle([-12.5, -12.5, 0], [centerx, centery, 0], [-12.5, 12.5, 0],);
+                t6.render();
+                triangles.push(t6.mesh);
+        */
+        /*
+                for (let i = 0; i < triangles.length - 1; i++) {
+                    _out = triangles[i];
+                    for (let j = 1; j < triangles.length; j++) {
+                        _in = triangles[j];
+                        outBB = new THREE.Box3().setFromObject(_out);
+                        inBB = new THREE.Box3().setFromObject(_in);
+                        collision = outBB.intersectsBox(inBB);
+                        //while (collision) {
+                        // }
+                    }
+                }
+        */
 
         var controls = new THREE.DragControls(triangles, camera, renderer.domElement);
         controls.addEventListener('dragstart', function (event) {
-            event.object.material.opacity = 0.5
+            event.object.material.opacity = 0.7
         })
         controls.addEventListener('dragend', function (event) {
             event.object.material.opacity = 1

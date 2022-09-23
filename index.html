@@ -79,6 +79,9 @@
         const line = new THREE.Line(geometry, material);
         scene.add(line);
 
+        const pieceNumber = window.prompt("Please enter how many pieces you want in your puzzle. You may enter no less than 6.");
+        console.log(pieceNumber);
+
         // The "Frame-per-second" loop
         function animate() {
             requestAnimationFrame(animate);
@@ -229,7 +232,7 @@
 
         }
 
-        buildBoard(6);
+        buildBoard(pieceNumber);
 
         for (var i = 0; i < triangles.length; i++) {
             triangles[i].translateX(getRndInteger(-20, 20));

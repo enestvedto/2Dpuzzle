@@ -79,9 +79,6 @@
         const line = new THREE.Line(geometry, material);
         scene.add(line);
 
-        const pieceNumber = window.prompt("Please enter how many pieces you want in your puzzle. You may enter no less than 6.");
-        console.log(pieceNumber);
-
         // The "Frame-per-second" loop
         function animate() {
             requestAnimationFrame(animate);
@@ -101,11 +98,11 @@
         var triangles = [];
 
         //this method initializes the board. you CAN NOT have less than 6 pieces per directions
-        function buildBoard(numberOfPieces) {
+        function buildBoard() {
             //make sure the number of pieces is at least 6. don't build if it isn't
-            if (numberOfPieces < 6) {
-                console.log('try again with at least 6 pieces');
-                return;
+            var numberOfPieces = -1;
+            while (numberOfPieces < 6) {
+                numberOfPieces = window.prompt("Please enter how many pieces you want in your puzzle. You may enter no less than 6.");
             }
 
             // calculate how to divide the number of vertices generated based on the number of triangles desired
@@ -232,7 +229,7 @@
 
         }
 
-        buildBoard(pieceNumber);
+        buildBoard();
 
         for (var i = 0; i < triangles.length; i++) {
             triangles[i].translateX(getRndInteger(-20, 20));

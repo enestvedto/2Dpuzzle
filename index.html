@@ -49,6 +49,7 @@
         }
 
         function load() {
+            window.alert("Congratulations! You have solved the puzzle...click \"ok\" to claim your reward!");
             window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
         }
 
@@ -231,8 +232,8 @@
         buildBoard(6);
 
         for (var i = 0; i < triangles.length; i++) {
-            triangles[i].translateX(-10);
-            triangles[i].translateY(-10);
+            triangles[i].translateX(getRndInteger(-20, 20));
+            triangles[i].translateY(getRndInteger(-20, 20));
         }
 
         /*
@@ -264,7 +265,6 @@
                 }
                 // suprise for finishing the puzzle :)
                 if (triangles.length == 0) {
-                    window.alert("Congratulations! You have solved the puzzle...click \"ok\" to claim your reward!");
                     load();
                 }
             }

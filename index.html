@@ -5,15 +5,13 @@
 </head>
 
 <body>
-    <button onclick="load()">Click me to test your prize for finishing the puzzle!</button>
-
     <canvas id="myCanvas" width="800" height="600"></canvas>
     <script src="three.js"></script>
     <script src="DragControls.js"></script>
 
     <script>
         // Create the object to represent a triangle
-        function Triangle(a, b, c) {
+        function colorTriangle(a, b, c) {
             // Build the vertices manually by creating arrays
             this.vertices = [
                 a[0], a[1], a[2],
@@ -48,6 +46,10 @@
         // function to more easily get a random number within a desired range
         function getRndInteger(min, max) {
             return Math.floor(Math.random() * (max - min)) + min;
+        }
+
+        function load() {
+            window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
         }
 
         var scene = new THREE.Scene();
@@ -218,7 +220,7 @@
 
             // turn the list of all the vertices into triangles!
             for (var i = 0; i < allPoints.length; i += 3) {
-                tmpTriangle = new Triangle(allPoints[i], allPoints[i + 1], allPoints[i + 2]);
+                tmpTriangle = new colorTriangle(allPoints[i], allPoints[i + 1], allPoints[i + 2]);
                 tmpTriangle.render();
                 triangles.push(tmpTriangle.mesh);
             }
@@ -228,11 +230,10 @@
 
         buildBoard(6);
 
-        function load() {
-            window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
+        for (var i = 0; i < triangles.length; i++) {
+            triangles[i].translateX(-10);
+            triangles[i].translateY(-10);
         }
-
-
 
         /*
                 for (let i = 0; i < triangles.length - 1; i++) {
@@ -248,12 +249,26 @@
                 }
         */
 
-        var controls = new THREE.DragControls(triangles, camera, renderer.domElement);
-        controls.addEventListener('dragstart', function (event) {
+        var pieceControls = new THREE.DragControls(triangles, camera, renderer.domElement);
+        pieceControls.addEventListener('dragstart', function (event) {
             event.object.material.opacity = 0.8
         })
-        controls.addEventListener('dragend', function (event) {
+        pieceControls.addEventListener('dragend', function (event) {
             event.object.material.opacity = 1
+            if (Math.abs(event.object.position.x) < 0.5 && Math.abs(event.object.position.y) < 0.5) {
+                event.object.position.set(0, 0, 0);
+                // remove the piece from the array of draggable pieces
+                const index = triangles.indexOf(event.object);
+                if (index > -1) { // only splice array when item is found
+                    triangles.splice(index, 1); // 2nd parameter means remove one item only
+                }
+                // suprise for finishing the puzzle :)
+                if (triangles.length == 0) {
+                    window.alert("Congratulations! You have solved the puzzle...click \"ok\" to claim your reward!");
+                    load();
+                }
+            }
+
         })
 
 

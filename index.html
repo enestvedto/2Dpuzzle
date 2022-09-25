@@ -48,6 +48,17 @@
             return Math.floor(Math.random() * (max - min)) + min;
         }
 
+        function posOrNeg() {
+            tmp = Math.random();
+            if (tmp > 0.5) {
+                return 1;
+            }
+            else {
+                return -1;
+            }
+
+        }
+
         function load() {
             window.alert("Congratulations! You have solved the puzzle...click \"ok\" to claim your reward!");
             window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
@@ -98,12 +109,12 @@
         var triangles = [];
 
         //this method initializes the board. you CAN NOT have less than 6 pieces per directions
-        function buildBoard() {
+        function buildBoard(numberOfPieces) {
             //make sure the number of pieces is at least 6. don't build if it isn't
-            var numberOfPieces = -1;
-            while (numberOfPieces < 6) {
-                numberOfPieces = window.prompt("Please enter how many pieces you want in your puzzle. You may enter no less than 6.");
-            }
+            //var numberOfPieces = -1;
+            // while (numberOfPieces < 6) {
+            //     numberOfPieces = window.prompt("Please enter how many pieces you want in your puzzle. You may enter no less than 6.");
+            // }
 
             // calculate how to divide the number of vertices generated based on the number of triangles desired
             perSide = Math.trunc(numberOfPieces / 4);
@@ -226,15 +237,9 @@
                 triangles.push(tmpTriangle.mesh);
             }
 
-
         }
 
-        buildBoard();
-
-        for (var i = 0; i < triangles.length; i++) {
-            triangles[i].translateX(getRndInteger(-20, 20));
-            triangles[i].translateY(getRndInteger(-20, 20));
-        }
+        buildBoard(6);
 
         /*
                 for (let i = 0; i < triangles.length - 1; i++) {
@@ -249,6 +254,12 @@
                     }
                 }
         */
+
+        for (var i = 0; i < triangles.length; i++) {
+            curr = triangles[i];
+            curr.translateX(getRndInteger(28, 40) * posOrNeg());
+            curr.translateY(getRndInteger(1, 18) * posOrNeg());
+        }
 
         var pieceControls = new THREE.DragControls(triangles, camera, renderer.domElement);
         pieceControls.addEventListener('dragstart', function (event) {

@@ -10,6 +10,11 @@
     <script src="DragControls.js"></script>
 
     <script>
+        var centerx = getRndInteger(-5, 5);
+        var centery = getRndInteger(-5, 5);
+
+        var triangles = [];
+
         // Create the object to represent a triangle
         function colorTriangle(a, b, c) {
             // Build the vertices manually by creating arrays
@@ -48,6 +53,7 @@
             return Math.floor(Math.random() * (max - min)) + min;
         }
 
+        // function to get a random output of -1 or 1
         function posOrNeg() {
             tmp = Math.random();
             if (tmp > 0.5) {
@@ -56,70 +62,28 @@
             else {
                 return -1;
             }
-
         }
 
+        // extra fun credit?
         function load() {
             window.alert("Congratulations! You have solved the puzzle...click \"ok\" to claim your reward!");
-            window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
+            window.open('https://www.youtube.com/watch?v=xvFZjo5PgG0', "_self");
         }
-
-        var scene = new THREE.Scene();
-
-        var camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, .1, 3000);
-        camera.position.z = 100;  // Try moving this around!
-        camera.lookAt(new THREE.Vector3(0.0, 0.0, 0.0));
-        scene.add(camera);
-
-        var renderer = new THREE.WebGLRenderer({ canvas: myCanvas, antialias: true, alpha: true });
-        renderer.setClearColor(0xffffff);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-
-        const material = new THREE.LineBasicMaterial({ color: 0x000000 });
-
-        //drawing vectors for the outline of the board
-        const points = [];
-        points.push(new THREE.Vector3(-12.5, -12.5, 0));
-        points.push(new THREE.Vector3(12.5, -12.5, 0));
-        points.push(new THREE.Vector3(12.5, 12.5, 0));
-        points.push(new THREE.Vector3(-12.5, 12.5, 0));
-        points.push(new THREE.Vector3(-12.5, -12.5, 0));
-
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        const line = new THREE.Line(geometry, material);
-        scene.add(line);
-
-        // The "Frame-per-second" loop
-        function animate() {
-            requestAnimationFrame(animate);
-            render();
-        }
-
-        function render() {
-            renderer.render(scene, camera);
-        }
-
-        // Initiate the graphical loop
-        animate();
-
-        var centerx = getRndInteger(-5, 5);
-        var centery = getRndInteger(-5, 5);
-
-        var triangles = [];
 
         //this method initializes the board. you CAN NOT have less than 6 pieces per directions
-        function buildBoard(numberOfPieces) {
+        function buildBoard() {
             //make sure the number of pieces is at least 6. don't build if it isn't
-            //var numberOfPieces = -1;
-            // while (numberOfPieces < 6) {
-            //     numberOfPieces = window.prompt("Please enter how many pieces you want in your puzzle. You may enter no less than 6.");
-            // }
+            // above and beyond 1 uses the prompt gui to let the user easily customize the number of pieces they want in their puzzle
+            var numberOfPieces = -1;
+            while (numberOfPieces < 6) {
+                numberOfPieces = window.prompt("Please enter how many pieces you want in your puzzle. You may enter no less than 6.");
+            }
 
             // calculate how to divide the number of vertices generated based on the number of triangles desired
             perSide = Math.trunc(numberOfPieces / 4);
             LrTb = numberOfPieces % 4;
 
+            // calculating how many vertices to create along each border
             sides = [perSide, perSide, perSide, perSide];
             for (i = 0; i < LrTb; i++) {
                 sides[i % 4] = sides[i % 4] + 1;
@@ -157,10 +121,9 @@
             bottomPoints.sort(function (a, b) { return a - b });
             bottomPoints.reverse();
 
-            allPoints = [];
-
             // put all the vertices in a list to easily reference. the 3rd vertex will always be the first vertex 
             // of the next triangle, and the generated origin will always be the second for each triangle.
+            allPoints = [];
 
             //start with the bottom left corner vertex
             allPoints.push([-12.5, -12.5, 0]);
@@ -236,40 +199,90 @@
                 tmpTriangle.render();
                 triangles.push(tmpTriangle.mesh);
             }
-
         }
 
-        buildBoard(6);
-
-        /*
-                for (let i = 0; i < triangles.length - 1; i++) {
-                    _out = triangles[i];
-                    for (let j = 1; j < triangles.length; j++) {
-                        _in = triangles[j];
-                        outBB = new THREE.Box3().setFromObject(_out);
-                        inBB = new THREE.Box3().setFromObject(_in);
-                        collision = outBB.intersectsBox(inBB);
-                        //while (collision) {
-                        // }
+        // this method randomly places the pieces outside of the board without any overlaps
+        function randomizePieces() {
+            // check every piece
+            for (var i = 0; i < triangles.length; i++) {
+                // make sure piece begins in its original location inside the puzzle board
+                triangles[i].position.set(0, 0, 0);
+                // randomly move in the x and y directions
+                triangles[i].translateX(getRndInteger(28, 40) * posOrNeg());
+                triangles[i].translateY(getRndInteger(-18, 18));
+                // make a bounding box for the current piece
+                var box = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+                box.setFromObject(triangles[i], true);
+                for (var j = 0; j < triangles.length; j++) {
+                    // don't compare the current triangle to itself
+                    if (i == j) {
+                        continue;
+                    }
+                    // compare triangle 'i' to every other triangle 'j'
+                    var box2 = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+                    box2.setFromObject(triangles[j], true);
+                    // if there is a collision reset the position and try a new random one
+                    if (box.intersectsBox(box2)) {
+                        i--;
+                        break;
                     }
                 }
-        */
-
-        for (var i = 0; i < triangles.length; i++) {
-            curr = triangles[i];
-            curr.translateX(getRndInteger(28, 40) * posOrNeg());
-            curr.translateY(getRndInteger(1, 18) * posOrNeg());
+            }
         }
 
+        var scene = new THREE.Scene();
+
+        var camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, .1, 3000);
+        camera.position.z = 100;  // Try moving this around!
+        camera.lookAt(new THREE.Vector3(0.0, 0.0, 0.0));
+        scene.add(camera);
+
+        var renderer = new THREE.WebGLRenderer({ canvas: myCanvas, antialias: true, alpha: true });
+        renderer.setClearColor(0xffffff);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const material = new THREE.LineBasicMaterial({ color: 0x000000 });
+
+        //drawing vectors for the outline of the board
+        const points = [];
+        points.push(new THREE.Vector3(-12.5, -12.5, 0));
+        points.push(new THREE.Vector3(12.5, -12.5, 0));
+        points.push(new THREE.Vector3(12.5, 12.5, 0));
+        points.push(new THREE.Vector3(-12.5, 12.5, 0));
+        points.push(new THREE.Vector3(-12.5, -12.5, 0));
+
+        // add the square board to the scence
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(geometry, material);
+        scene.add(line);
+
+        // The "Frame-per-second" loop
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+
+        buildBoard();
+        randomizePieces();
+
+        // add drag controls to the puzzle pieces
         var pieceControls = new THREE.DragControls(triangles, camera, renderer.domElement);
         pieceControls.addEventListener('dragstart', function (event) {
+            // above and beyond 2 uses the drag listener to alter the visual appearance of the piece while being moved around.
             event.object.material.opacity = 0.8
         })
         pieceControls.addEventListener('dragend', function (event) {
+            // above and beyond 2 uses the drag listener to reset the visual appearance of the piece after being released.
             event.object.material.opacity = 1
+            // if the piece is released within close proximity to its correct location, snap the piece into place.
             if (Math.abs(event.object.position.x) < 0.5 && Math.abs(event.object.position.y) < 0.5) {
                 event.object.position.set(0, 0, 0);
-                // remove the piece from the array of draggable pieces
+                // remove the piece from the list of draggable pieces so the correct piece is locked into place
                 const index = triangles.indexOf(event.object);
                 if (index > -1) { // only splice array when item is found
                     triangles.splice(index, 1); // 2nd parameter means remove one item only
@@ -281,6 +294,9 @@
             }
 
         })
+
+        // Initiate the graphical loop
+        animate();
 
 
     </script>

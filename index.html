@@ -80,8 +80,9 @@
             }
 
             // calculate how to divide the number of vertices generated based on the number of triangles desired
-            perSide = Math.trunc(numberOfPieces / 4);
-            LrTb = numberOfPieces % 4;
+            var extraVertices = numberOfPieces - 4;
+            perSide = Math.trunc(extraVertices / 4);
+            LrTb = extraVertices - (perSide * 4);
 
             // calculating how many vertices to create along each border
             sides = [perSide, perSide, perSide, perSide];
@@ -98,17 +99,57 @@
             bottomPoints = [];
 
             // randomly generate the desired number of vertices on each border side
-            for (var i = 0; i < _left - 1; i++) {
-                leftPoints.push(getRndInteger(-10, 10));
+            for (var i = 0; i < _left; i++) {
+                // start with an impossible value
+                var tmpLeft = -100;
+                do {
+                    tmpLeft = getRndInteger(-10, 10);
+                }
+                // keep trying to make a new vertex until a unique one is generated
+                while (leftPoints.includes(tmpLeft))
+                {
+                    tmpLeft = getRndInteger(-10, 10);
+                }
+                leftPoints.push(tmpLeft);
             }
-            for (var i = 0; i < _right - 1; i++) {
-                rightPoints.push(getRndInteger(-10, 10));
+            for (var i = 0; i < _right; i++) {
+                // start with an impossible value
+                var tmpRight = -100;
+                do {
+                    tmpRight = getRndInteger(-10, 10);
+                }
+                // keep trying to make a new vertex until a unique one is generated
+                while (rightPoints.includes(tmpRight))
+                {
+                    tmpRight = getRndInteger(-10, 10);
+                }
+                rightPoints.push(tmpRight);
             }
-            for (var i = 0; i < _top - 1; i++) {
-                topPoints.push(getRndInteger(-10, 10));
+            for (var i = 0; i < _top; i++) {
+                // start with an impossible value
+                var tmpTop = -100;
+                do {
+                    tmpTop = getRndInteger(-10, 10);
+                }
+                // keep trying to make a new vertex until a unique one is generated
+                while (topPoints.includes(tmpTop))
+                {
+                    tmpTop = getRndInteger(-10, 10);
+                }
+                topPoints.push(tmpTop);
             }
-            for (var i = 0; i < _bottom - 1; i++) {
-                bottomPoints.push(getRndInteger(-10, 10));
+            for (var i = 0; i < _bottom; i++) {
+                // start with an impossible value
+                var tmpBottom = -100;
+                do {
+                    tmpBottom = getRndInteger(-10, 10);
+                }
+                // keep trying to make a new vertex until a unique one is generated
+                while (bottomPoints.includes(tmpBottom))
+                {
+                    tmpBottom = getRndInteger(-10, 10);
+                }
+                bottomPoints.push(tmpBottom);
             }
             // working neg to pos
             leftPoints.sort(function (a, b) { return a - b });
@@ -127,7 +168,8 @@
 
             //start with the bottom left corner vertex
             allPoints.push([-12.5, -12.5, 0]);
-            for (var i = 0; i < leftPoints.length + 1; i++) {
+            console.log(leftPoints);
+            for (var i = 0; i < leftPoints.length; i++) {
                 // push origin point
                 allPoints.push([centerx, centery, 0]);
                 //push the next random vertex on the board line
@@ -135,16 +177,15 @@
                 // push the same point again as it will serve as the first vertex for the next triangle
                 allPoints.push([-12.5, leftPoints[i], 0]);
             }
-            //remove extra vertices and replace with corner vertex
-            allPoints.pop();
-            allPoints.pop();
+            // add center vertex to complete last triangle
+            allPoints.push([centerx, centery, 0]);
             //finish the left triangles with the top left vertex
             allPoints.push([-12.5, 12.5, 0]);
 
 
             //next do the top vertices starting with the top left vertex
             allPoints.push([-12.5, 12.5, 0]);
-            for (var i = 0; i < topPoints.length + 1; i++) {
+            for (var i = 0; i < topPoints.length; i++) {
                 // push origin point
                 allPoints.push([centerx, centery, 0]);
                 //push the next random vertex on the board line
@@ -152,16 +193,15 @@
                 // push the same point again as it will serve as the first vertex for the next triangle
                 allPoints.push([topPoints[i], 12.5, 0]);
             }
-            //remove extra vertex and replace with corner vertex
-            allPoints.pop();
-            allPoints.pop();
+            // add center vertex to complete last triangle
+            allPoints.push([centerx, centery, 0]);
             //finish the top triangles with the top right vertex
             allPoints.push([12.5, 12.5, 0]);
 
 
             // next do the right vertices starting with the top right vertex
             allPoints.push([12.5, 12.5, 0]);
-            for (var i = 0; i < rightPoints.length + 1; i++) {
+            for (var i = 0; i < rightPoints.length; i++) {
                 // push origin point
                 allPoints.push([centerx, centery, 0]);
                 //push the next random vertex on the board line
@@ -169,16 +209,15 @@
                 // push the same point again as it will serve as the first vertex for the next triangle
                 allPoints.push([12.5, rightPoints[i], 0]);
             }
-            //remove extra vertex and replace with corner vertex
-            allPoints.pop();
-            allPoints.pop();
+            // add center vertex to complete last triangle
+            allPoints.push([centerx, centery, 0]);
             //finish the right triangles with the bottom right vertex
             allPoints.push([12.5, -12.5, 0]);
 
 
             // lastly do the bottom vertices starting with the bottom right vertex
             allPoints.push([12.5, -12.5, 0]);
-            for (var i = 0; i < bottomPoints.length + 1; i++) {
+            for (var i = 0; i < bottomPoints.length; i++) {
                 // push origin point
                 allPoints.push([centerx, centery, 0]);
                 //push the next random vertex on the board line
@@ -186,9 +225,8 @@
                 // push the same point again as it will serve as the first vertex for the next triangle
                 allPoints.push([bottomPoints[i], -12.5, 0]);
             }
-            //remove extra vertex and replace with corner vertex
-            allPoints.pop();
-            allPoints.pop();
+            // add center vertex to complete last triangle
+            allPoints.push([centerx, centery, 0]);
             // finish the bottom triangles with the bottom left vertex (initial starting vertex)
             allPoints.push([-12.5, -12.5, 0]);
 
@@ -208,7 +246,7 @@
                 // make sure piece begins in its original location inside the puzzle board
                 triangles[i].position.set(0, 0, 0);
                 // randomly move in the x and y directions
-                triangles[i].translateX(getRndInteger(28, 40) * posOrNeg());
+                triangles[i].translateX(getRndInteger(28, 45) * posOrNeg());
                 triangles[i].translateY(getRndInteger(-18, 18));
                 // make a bounding box for the current piece
                 var box = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
@@ -268,7 +306,7 @@
         }
 
         buildBoard();
-        randomizePieces();
+        //randomizePieces();
 
         // add drag controls to the puzzle pieces
         var pieceControls = new THREE.DragControls(triangles, camera, renderer.domElement);

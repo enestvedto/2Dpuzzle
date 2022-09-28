@@ -10,12 +10,11 @@
     <script src="DragControls.js"></script>
 
     <script>
-        var centerx = getRndInteger(-5, 5);
-        var centery = getRndInteger(-5, 5);
-
+        // the list to hold the pieces
         var triangles = [];
 
         // Create the object to represent a triangle
+        // method code initially based off of code from Christopher Stuetzle in class
         function colorTriangle(a, b, c) {
             // Build the vertices manually by creating arrays
             this.vertices = [
@@ -53,17 +52,6 @@
             return Math.floor(Math.random() * (max - min)) + min;
         }
 
-        // function to get a random output of -1 or 1
-        function posOrNeg() {
-            tmp = Math.random();
-            if (tmp > 0.5) {
-                return 1;
-            }
-            else {
-                return -1;
-            }
-        }
-
         // extra fun credit?
         function load() {
             window.alert("Congratulations! You have solved the puzzle...click \"ok\" to claim your reward!");
@@ -72,18 +60,22 @@
 
         //this method initializes the board. you CAN NOT have less than 6 pieces per directions
         function buildBoard() {
-            //make sure the number of pieces is at least 6. don't build if it isn't
+            // pick a random center point for the board.
+            var centerx = getRndInteger(-5, 5);
+            var centery = getRndInteger(-5, 5);
+            // make sure the number of pieces is at least 6 and at most 20. don't build and prompt for a number again if it isn't
             // above and beyond 1 uses the prompt gui to let the user easily customize the number of pieces they want in their puzzle
             var numberOfPieces = -1;
             while (numberOfPieces < 6 || numberOfPieces > 20) {
                 numberOfPieces = window.prompt("Please enter how many pieces you want in your puzzle. You may enter no less than 6, and no more than 20.");
             }
 
-            // calculate how to divide the number of vertices generated based on the number of triangles desired
+            // calculate the number of extra vertices needed to be generated, excluding the 4 corners
             var extraVertices = numberOfPieces - 4;
+            // calculate how many vertices at minimum will be generated along each side
             perSide = Math.trunc(extraVertices / 4);
+            // LrTb is shorthand for left,right,top,bottom...this is a list to store the number of vertices total per side
             LrTb = extraVertices - (perSide * 4);
-
             // calculating how many vertices to create along each border
             sides = [perSide, perSide, perSide, perSide];
             for (i = 0; i < LrTb; i++) {
@@ -100,7 +92,6 @@
 
             // randomly generate the desired number of vertices on each border side
             for (var i = 0; i < _left; i++) {
-                // start with an impossible value
                 var tmpLeft = getRndInteger(-10, 10);
                 // keep trying to make a new vertex until a unique one is generated
                 while (leftPoints.includes(tmpLeft)) {
@@ -109,7 +100,6 @@
                 leftPoints.push(tmpLeft);
             }
             for (var i = 0; i < _right; i++) {
-                // start with an impossible value
                 var tmpRight = getRndInteger(-10, 10);
                 // keep trying to make a new vertex until a unique one is generated
                 while (rightPoints.includes(tmpRight)) {
@@ -118,7 +108,6 @@
                 rightPoints.push(tmpRight);
             }
             for (var i = 0; i < _top; i++) {
-                // start with an impossible value
                 var tmpTop = getRndInteger(-10, 10);
                 // keep trying to make a new vertex until a unique one is generated
                 while (topPoints.includes(tmpTop)) {
@@ -127,7 +116,6 @@
                 topPoints.push(tmpTop);
             }
             for (var i = 0; i < _bottom; i++) {
-                // start with an impossible value
                 var tmpBottom = getRndInteger(-10, 10);
                 // keep trying to make a new vertex until a unique one is generated
                 while (bottomPoints.includes(tmpBottom)) {
@@ -135,19 +123,23 @@
                 }
                 bottomPoints.push(tmpBottom);
             }
-            // working neg to pos
+            // sort lest side points from negative to positive because the triangle generation works in a clockwise fashion 
+            // due to right hand rule making the normal of the triangle face the correct direction
             leftPoints.sort(function (a, b) { return a - b });
-            // working pos to neg
+            // sort right side points from positive to negative because the triangle generation works in a clockwise fashion 
+            // due to right hand rule making the normal of the triangle face the correct direction
             rightPoints.sort(function (a, b) { return a - b });
             rightPoints.reverse();
-            // working neg to pos
+            // sort top points from negative to positive because the triangle generation works in a clockwise fashion 
+            // due to right hand rule making the normal of the triangle face the correct direction
             topPoints.sort(function (a, b) { return a - b });
-            // working pos to neg
+            // sort bottom points from negative to positive because the triangle generation works in a clockwise fashion 
+            // due to right hand rule making the normal of the triangle face the correct direction
             bottomPoints.sort(function (a, b) { return a - b });
             bottomPoints.reverse();
 
-            // put all the vertices in a list to easily reference. the 3rd vertex will always be the first vertex 
-            // of the next triangle, and the generated origin will always be the second for each triangle.
+            // put all the vertices in a list to easily reference. the 3rd vertex of each loop will serve as the first
+            // vertex of the next triangle, and the generated origin will always be the second for each triangle.
             allPoints = [];
 
             //start with the bottom left corner vertex
@@ -155,30 +147,30 @@
             for (var i = 0; i < leftPoints.length; i++) {
                 // push origin point
                 allPoints.push([centerx, centery, 0]);
-                //push the next random vertex on the board line
+                // push the next random vertex on the board line
                 allPoints.push([-12.5, leftPoints[i], 0]);
                 // push the same point again as it will serve as the first vertex for the next triangle
                 allPoints.push([-12.5, leftPoints[i], 0]);
             }
             // add center vertex to complete last triangle
             allPoints.push([centerx, centery, 0]);
-            //finish the left triangles with the top left vertex
+            // finish the left triangles with the top left vertex
             allPoints.push([-12.5, 12.5, 0]);
 
 
-            //next do the top vertices starting with the top left vertex
+            // next do the top vertices starting with the top left vertex
             allPoints.push([-12.5, 12.5, 0]);
             for (var i = 0; i < topPoints.length; i++) {
                 // push origin point
                 allPoints.push([centerx, centery, 0]);
-                //push the next random vertex on the board line
+                // push the next random vertex on the board line
                 allPoints.push([topPoints[i], 12.5, 0]);
                 // push the same point again as it will serve as the first vertex for the next triangle
                 allPoints.push([topPoints[i], 12.5, 0]);
             }
             // add center vertex to complete last triangle
             allPoints.push([centerx, centery, 0]);
-            //finish the top triangles with the top right vertex
+            // finish the top triangles with the top right vertex
             allPoints.push([12.5, 12.5, 0]);
 
 
@@ -187,14 +179,14 @@
             for (var i = 0; i < rightPoints.length; i++) {
                 // push origin point
                 allPoints.push([centerx, centery, 0]);
-                //push the next random vertex on the board line
+                // push the next random vertex on the board line
                 allPoints.push([12.5, rightPoints[i], 0]);
                 // push the same point again as it will serve as the first vertex for the next triangle
                 allPoints.push([12.5, rightPoints[i], 0]);
             }
             // add center vertex to complete last triangle
             allPoints.push([centerx, centery, 0]);
-            //finish the right triangles with the bottom right vertex
+            // finish the right triangles with the bottom right vertex
             allPoints.push([12.5, -12.5, 0]);
 
 
@@ -203,7 +195,7 @@
             for (var i = 0; i < bottomPoints.length; i++) {
                 // push origin point
                 allPoints.push([centerx, centery, 0]);
-                //push the next random vertex on the board line
+                // push the next random vertex on the board line
                 allPoints.push([bottomPoints[i], -12.5, 0]);
                 // push the same point again as it will serve as the first vertex for the next triangle
                 allPoints.push([bottomPoints[i], -12.5, 0]);
@@ -230,7 +222,8 @@
             var box2 = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
             // check every piece
             for (var i = 0; i < triangles.length - 1; i++) {
-                // make sure piece begins in its original location inside the puzzle board
+                // make sure piece begins in its original location inside the puzzle board in case the location has to be
+                // randomly set more than once due to collision
                 triangles[i].position.set(0, 0, 0);
                 // randomly move in the x and y directions
                 triangles[i].translateX(getRndInteger(-48, 48));
@@ -244,13 +237,15 @@
                     }
                     // compare triangle 'i' to every other triangle 'j'
                     box2.setFromObject(triangles[j], true);
-                    // if there is a collision reset the position and try a new random one
+                    // if there is a collision reset the position and try a new random location, re-checking against
+                    // every other piece
                     if (box.intersectsBox(box2)) {
                         i--;
                         break;
                     }
                 }
             }
+            // remove the board from the list of pieces so it is not draggable
             triangles.pop();
         }
 
@@ -306,7 +301,8 @@
             // if the piece is released within close proximity to its correct location, snap the piece into place.
             if (Math.abs(event.object.position.x) < 0.5 && Math.abs(event.object.position.y) < 0.5) {
                 event.object.position.set(0, 0, 0);
-                // remove the piece from the list of draggable pieces so the correct piece is locked into place
+                // remove the piece from the list of draggable pieces so the correct piece is locked into place once is has
+                // been snapped into its correct location
                 const index = triangles.indexOf(event.object);
                 if (index > -1) { // only splice array when item is found
                     triangles.splice(index, 1); // 2nd parameter means remove one item only
@@ -316,7 +312,6 @@
                     load();
                 }
             }
-
         });
 
         // Initiate the graphical loop

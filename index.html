@@ -251,6 +251,7 @@
                     }
                 }
             }
+            triangles.pop();
         }
 
         var scene = new THREE.Scene();
@@ -311,7 +312,7 @@
                     triangles.splice(index, 1); // 2nd parameter means remove one item only
                 }
                 // suprise for finishing the puzzle :)
-                if (triangles.length == 1) {
+                if (triangles.length == 0) {
                     load();
                 }
             }

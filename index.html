@@ -75,8 +75,8 @@
             //make sure the number of pieces is at least 6. don't build if it isn't
             // above and beyond 1 uses the prompt gui to let the user easily customize the number of pieces they want in their puzzle
             var numberOfPieces = -1;
-            while (numberOfPieces < 6) {
-                numberOfPieces = window.prompt("Please enter how many pieces you want in your puzzle. You may enter no less than 6.");
+            while (numberOfPieces < 6 || numberOfPieces > 20) {
+                numberOfPieces = window.prompt("Please enter how many pieces you want in your puzzle. You may enter no less than 6, and no more than 20.");
             }
 
             // calculate how to divide the number of vertices generated based on the number of triangles desired
@@ -224,15 +224,18 @@
 
         // this method randomly places the pieces outside of the board without any overlaps
         function randomizePieces() {
+            // add the board to the array for the purpose of checking collisions
+            triangles.push(line);
+            var box = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+            var box2 = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
             // check every piece
-            for (var i = 0; i < triangles.length; i++) {
+            for (var i = 0; i < triangles.length - 1; i++) {
                 // make sure piece begins in its original location inside the puzzle board
                 triangles[i].position.set(0, 0, 0);
                 // randomly move in the x and y directions
-                triangles[i].translateX(getRndInteger(28, 45) * posOrNeg());
+                triangles[i].translateX(getRndInteger(-48, 48));
                 triangles[i].translateY(getRndInteger(-18, 18));
                 // make a bounding box for the current piece
-                var box = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
                 box.setFromObject(triangles[i], true);
                 for (var j = 0; j < triangles.length; j++) {
                     // don't compare the current triangle to itself
@@ -240,7 +243,6 @@
                         continue;
                     }
                     // compare triangle 'i' to every other triangle 'j'
-                    var box2 = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
                     box2.setFromObject(triangles[j], true);
                     // if there is a collision reset the position and try a new random one
                     if (box.intersectsBox(box2)) {
@@ -289,14 +291,14 @@
         }
 
         buildBoard();
-        //randomizePieces();
+        randomizePieces();
 
         // add drag controls to the puzzle pieces
         var pieceControls = new THREE.DragControls(triangles, camera, renderer.domElement);
         pieceControls.addEventListener('dragstart', function (event) {
             // above and beyond 2 uses the drag listener to alter the visual appearance of the piece while being moved around.
             event.object.material.opacity = 0.8
-        })
+        });
         pieceControls.addEventListener('dragend', function (event) {
             // above and beyond 2 uses the drag listener to reset the visual appearance of the piece after being released.
             event.object.material.opacity = 1
@@ -309,12 +311,12 @@
                     triangles.splice(index, 1); // 2nd parameter means remove one item only
                 }
                 // suprise for finishing the puzzle :)
-                if (triangles.length == 0) {
+                if (triangles.length == 1) {
                     load();
                 }
             }
 
-        })
+        });
 
         // Initiate the graphical loop
         animate();
